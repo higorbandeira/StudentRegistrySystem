@@ -41,7 +41,7 @@ Follow these steps to get a local development environment running:
 
 1. Clone the Repository
 bash
-git clone https://github.com/your-username/StudentRegistrySystem.git
+git clone https://github.com/higorbandeira/StudentRegistrySystem
 cd StudentRegistrySystem
 2. Configure Environment Variables
 Create an .env file in the root directory (based on the provided .env.example)
