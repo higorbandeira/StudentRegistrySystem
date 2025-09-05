@@ -21,7 +21,7 @@ Backend Framework: ASP.NET Core
 
 Database: PostgreSQL with Entity Framework Core (EF Core)
 
-Messaging Queue: RabbitMQ for handling notification queues
+Messaging Queue: Kafka for handling notification queues
 
 Containerization: Docker & Docker Compose
 
