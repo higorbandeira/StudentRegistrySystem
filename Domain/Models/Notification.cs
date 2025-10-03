@@ -1,6 +1,6 @@
-﻿using API.Models.enums;
+﻿using Domain.Models.enums;
 
-namespace API.Models
+namespace Domain.Models
 {
     public class Notification
     {
@@ -13,12 +13,5 @@ namespace API.Models
 
         public Guardian Recipient { get; set; }
         public Student Student { get; set; }
-
-        public Notification()
-        {
-            Id = Guid.NewGuid();
-            SentDate = DateTime.UtcNow;
-            Status = enumNotificationStatus.Pending;
-        }
     }
 }

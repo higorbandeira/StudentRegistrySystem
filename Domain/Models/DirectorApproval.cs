@@ -1,6 +1,6 @@
-﻿using API.Models.enums;
+﻿using Domain.Models.enums;
 
-namespace API.Models
+namespace Domain.Models
 {
     public class DirectorApproval
     {

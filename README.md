@@ -1,271 +1,130 @@
-# StudentRegistrySystem
-A robust and secure student registration system for elementary and high schools. It handles enrollment, age validation, legal guardianship, and communication, built with ASP.NET Core, PostgreSQL, and Docker.
-Student Registry System
-A complete backend system for managing student registrations in elementary and high schools, featuring age validation, legal guardian management, and an integrated notification system using Kafka, with comprehensive observability through Datadog.
-
-📋 Table of Contents
-Overview
-
-Features
-
-Technology Stack
-
-Monitoring & Observability
-
-Architecture
-
-Prerequisites
-
-Quick Start
-
-API Documentation
-
-Testing
-
-Deployment
-
-Contributing
-
-🎯 Overview
-The Student Registry System is designed to streamline student enrollment processes while ensuring compliance with age requirements and legal guardianship rules. The system provides comprehensive observability through Datadog integration for monitoring, logging, and APM.
-
-✨ Features
-Core Functionality
-Student Registration: Complete CRUD operations with age validation
-
-Guardian Management: Support for up to two legal guardians per student
-
-Age Validation: Automatic validation based on Brazilian education standards
-
-Approval Workflow: Manual approval process for age exceptions
-
-Notification System
-Multi-channel notifications (WhatsApp, Email, SMS - simulated)
-
-Real-time status updates
-
-Notification history and tracking
-
-Kafka-based message queue for reliability
-
-Monitoring & Observability
-Datadog APM: Distributed tracing and performance monitoring
-
-Custom Metrics: Business metrics tracking for registrations and notifications
-
-Log Management: Structured logging with Datadog integration
-
-Real-time Dashboards: Operational and business metrics monitoring
-
-🛠️ Technology Stack
-Component	Technology
-Backend Framework	ASP.NET Core 8.0
-Database	PostgreSQL with Entity Framework Core
-Message Broker	Apache Kafka
-Monitoring	Datadog APM, Metrics, Logs
-Containerization	Docker & Docker Compose
-Testing	xUnit, Moq, TestContainers
-Documentation	Swagger/OpenAPI
-📊 Monitoring & Observability
-Datadog Integration
-The system is fully integrated with Datadog for comprehensive observability:
-
-APM (Application Performance Monitoring)
-Distributed Tracing: End-to-end request tracing across services
-
-Performance Metrics: Response times, throughput, error rates
-
-Service Map: Automatic dependency mapping
-
-csharp
-// Example of custom Datadog tracing
-using Datadog.Trace;
-
-public class StudentService
-{
-    public async Task<Student> RegisterStudent(StudentRegistrationDto dto)
-    {
-        using var scope = Tracer.Instance.StartActive("student.registration");
-        scope.Span.SetTag("student.age", dto.Age);
-        scope.Span.SetTag("school.year", dto.SchoolYear);
-        
-        // Business logic here
-    }
-}
-Custom Metrics
-Track business-specific metrics:
-
-csharp
-// Track registration metrics
-DogStatsd.Increment("student.registrations.total");
-DogStatsd.Increment("student.registrations.status.pending");
-DogStatsd.Gauge("student.age", studentAge);
-Log Management
-Structured JSON logging with Datadog integration
-
-Log correlation with traces
-
-Custom log attributes for business context
-
-Configuration
-json
-{
-  "Datadog": {
-    "Url": "https://app.datadoghq.com",
-    "ApiKey": "${DD_API_KEY}",
-    "ServiceName": "student-registry-system",
-    "Environment": "production"
-  }
-}
-Key Metrics Tracked
-Metric Name	Type	Description
-student.registrations.total	Counter	Total student registrations
-student.registrations.status.pending	Counter	Pending approval registrations
-student.age	Gauge	Age distribution of students
-notification.sent.total	Counter	Total notifications sent
-notification.delivery.status	Counter	Notification delivery status
-api.response_time	Histogram	API endpoint response times
-🏗️ Architecture
-The system follows Clean Architecture principles with Datadog integration:
-
-text
-src/
-├── Application/          # Application layer (Use Cases, DTOs, Interfaces)
-├── Domain/              # Domain layer (Entities, Value Objects, Domain Services)
-├── Infrastructure/      # Infrastructure (Persistence, Messaging, External Services)
-├── WebAPI/              # Presentation layer (Controllers, Middleware, Datadog config)
-└── Notifications.Consumer/ # Kafka consumer with Datadog tracing
-Datadog Components
-Datadog Agent: Running as Docker container
-
-.NET Tracer: Automatic instrumentation
-
-Custom Metrics: Business-level monitoring
-
-Log Pipeline: Structured logging integration
-
-📋 Prerequisites
-Before installation, ensure you have:
-
-Docker Desktop 20.10+ Download
-
-.NET 8.0 SDK Download
-
-Datadog Account Sign up
-
-Datadog API Key from your account settings
-
-Git Download
-
-4GB+ RAM available for containers
-
-🚀 Quick Start
-1. Clone and Setup
-bash
-git clone https://github.com/higorbandeira/StudentRegistrySystem
-cd student-registry-system
-2. Environment Configuration
-bash
-# Copy and configure environment variables
-cp .env.example .env
-Edit the .env file with your configuration:
-
-env
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=StudentRegistryDb
-DB_USER=postgres
-DB_PASSWORD=StrongPassword123!
-
-# Kafka
-KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-NOTIFICATIONS_TOPIC=student-notifications
-
-# Datadog
-DD_API_KEY=your_datadog_api_key_here
-DD_SITE=datadoghq.com
-DD_SERVICE=student-registry-system
-DD_ENV=development
-DD_APM_ENABLED=true
-DD_LOGS_INJECTION=true
-3. Start with Datadog
-bash
-# Start all services including Datadog agent
-docker-compose --env-file .env up -d
-
-# Apply database migrations
-cd src/WebAPI
-dotnet ef database update
-
-# Run the application with Datadog tracing
-DD_API_KEY=your_api_key_here dotnet run
-4. Verify Datadog Integration
-Check your Datadog dashboard for:
-
-✅ Service appearing in APM services list
-
-✅ Metrics being received
-
-✅ Logs flowing to Datadog
-
-✅ Infrastructure monitoring data
-
-📊 Datadog Dashboard Setup
-Import the pre-configured dashboard template:
-
-Navigate to Dashboards → New Dashboard in Datadog
-
-Select "Import Dashboard JSON"
-
-Use the template from monitoring/datadog-dashboard.json
-
-🧪 Testing with Datadog
-Run tests with Datadog monitoring:
-
-bash
-# Run tests with Datadog integration
-DD_API_KEY=your_api_key_here dotnet test --logger "trx;LogFileName=testresults.trx"
-🚀 Deployment
-Production Deployment with Datadog
-yaml
-# Example Kubernetes deployment with Datadog
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: student-registry-api
-spec:
-  template:
-    spec:
-      containers:
-      - name: api
-        image: student-registry-api:latest
-        env:
-        - name: DD_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: datadog-secret
-              key: api-key
-        - name: DD_APM_ENABLED
-          value: "true"
-📈 Monitoring & Alerts
-Set up Datadog monitors for:
-
-High Error Rates: API error percentage > 5%
-
-Slow Response Times: p95 response time > 500ms
-
-Notification Failures: Failed notification rate > 10%
-
-Database Performance: Slow queries detection
-
-🤝 Contributing
-When adding new features, ensure:
-
-Add appropriate Datadog metrics and tracing
-
-Update dashboard templates if needed
-
-Include monitoring documentation
-
-Test with Datadog integration enabled
+Especificação do Sistema de Cadastro de Alunos (Atualizada)
+
+-> Objetivo
+
+Desenvolver um sistema de cadastro de alunos para o ensino fundamental e médio, garantindo que as regras de idade, tutoria legal e comunicação com os responsáveis sejam respeitadas. O sistema deve permitir o acompanhamento do cadastro pelos tutores legais e oferecer uma interface amigável para a gestão escolar.
+
+-> Requisitos Funcionais
+
+-> Cadastro de Alunos
+O sistema deve permitir o cadastro de alunos com as seguintes informações obrigatórias:
+Nome completo
+Data de nascimento
+Ano letivo pretendido
+Nome(s) do(s) tutor(es) legal(is)
+Contato do(s) tutor(es) legal(is) (WhatsApp, e-mail e telefone para SMS)
+O sistema deve validar a idade do aluno com base no ano letivo pretendido:
+Ensino Fundamental:
+1º ano: 6 anos completos até o início do ano letivo.
+2º ano: 7 anos completos até o início do ano letivo.
+...
+9º ano: 14 anos completos até o início do ano letivo.
+Ensino Médio:
+1º ano: 15 anos completos até o início do ano letivo.
+2º ano: 16 anos completos até o início do ano letivo.
+3º ano: 17 anos completos até o início do ano letivo.
+Caso a idade do aluno não esteja de acordo com o ano letivo pretendido, o sistema deve:
+Bloquear o cadastro do aluno.
+Gerar uma notificação para a diretoria escolar solicitando aprovação manual.
+Enviar uma notificação aos tutores legais informando sobre a necessidade de aprovação.
+O sistema deve garantir que o aluno tenha menos de 18 anos no momento do cadastro, exceto se ele tiver completado 18 anos após julho do ano letivo.
+
+-> Cadastro de Tutores Legais
+O sistema deve permitir o cadastro de até dois tutores legais por aluno.
+Para cada tutor, devem ser cadastradas as seguintes informações:
+Nome completo
+CPF
+Contato (WhatsApp, e-mail e telefone para SMS)
+O sistema deve validar a existência de pelo menos um tutor legal para cada aluno.
+Notificações e Comunicação
+
+-> O sistema deve enviar notificações automáticas aos tutores legais sobre a situação cadastral do aluno, utilizando os seguintes canais:
+WhatsApp (simulado)
+E-mail (simulado)
+SMS (simulado)
+As notificações devem incluir:
+Status do cadastro (aprovado, pendente, rejeitado).
+Motivo da pendência ou rejeição, se aplicável.
+Orientações para regularizar o cadastro, se necessário.
+As notificações simuladas devem ser armazenadas no banco de dados para consulta posterior.
+
+-> Portal de Acompanhamento para Tutores
+
+O sistema deve disponibilizar um portal online para os tutores legais, onde eles possam:
+Consultar o status do cadastro do aluno.
+Atualizar informações de contato.
+Visualizar notificações enviadas pelo sistema.
+Consultar documentos ou solicitações pendentes.
+O acesso ao portal deve ser protegido por autenticação simples (não é necessário autenticação forte) e vinculado ao CPF do tutor legal.
+
+-> Requisitos Não Funcionais
+
+- Segurança:
+O sistema deve garantir a proteção dos dados pessoais dos alunos e tutores, em conformidade com a LGPD (Lei Geral de Proteção de Dados).
+A autenticação deve ser simples, mas suficiente para proteger o acesso ao portal.
+Usabilidade:
+A interface do sistema deve ser intuitiva e acessível para usuários com diferentes níveis de familiaridade com tecnologia.
+Escalabilidade:
+O sistema deve ser capaz de suportar o cadastro de até 10.000 alunos simultaneamente.
+Disponibilidade:
+O sistema deve estar disponível 99,9% do tempo, com exceção de períodos programados para manutenção.
+Integração:
+O sistema deve ser capaz de integrar-se com serviços de envio de mensagens (WhatsApp, e-mail e SMS) e com sistemas internos da escola, como o sistema de gestão acadêmica.
+Documentação:
+Deve ser gerada uma documentação detalhada explicando como executar o sistema em ambiente local.
+
+- Tecnologias
+Backend:
+ASP.NET Core para a lógica de negócios.
+Banco de Dados:
+PostgreSQL com Entity Framework Core (EF Core) para mapeamento objeto-relacional.
+Notificações:
+Simulação de envio de notificações (WhatsApp, e-mail e SMS), com armazenamento no banco de dados para consulta posterior.
+Mensageria:
+RabbitMQ para gerenciamento de filas de mensagens.
+Hospedagem:
+O sistema deve ser configurado para execução em contêineres Docker.
+Orquestração:
+Docker Compose para configuração e execução de dependências (RabbitMQ, banco de dados, etc.).
+
+- Entrega e Configuração
+Docker Compose:
+Deve ser gerado um arquivo docker-compose.yml para configurar e baixar todas as dependências necessárias (RabbitMQ, PostgreSQL, etc.).
+Documentação:
+Deve ser gerada uma documentação detalhada explicando como executar o sistema em ambiente local, incluindo:
+Passos para configurar o ambiente.
+Comandos para iniciar o sistema.
+Detalhes sobre as dependências utilizadas.
+Critérios de Avaliação
+
+-> Estrutura do Projeto
+Estrutura Arquitetural:
+O projeto deve seguir uma arquitetura bem definida, como:
+Clean Architecture
+Hexagonal Architecture
+Vertical Slice Architecture
+Padrões de Projeto:
+O uso de padrões de projeto será avaliado, como:
+Repository Pattern
+Factory Pattern
+Dependency Injection
+SOLID:
+O código deve seguir os princípios SOLID para garantir manutenibilidade e extensibilidade.
+Clean Code:
+O código deve ser limpo, legível e bem documentado.
+
+- Testes
+Estrutura dos Testes:
+O projeto deve conter uma estrutura clara para testes unitários e de integração.
+Cobertura de Testes:
+A completude dos testes será avaliada, garantindo que os principais fluxos do sistema estejam cobertos.
+Automação:
+Sempre que possível, os testes devem ser automatizados.
+
+-> Funcionalidades
+
+O sistema deve impedir o cadastro de alunos que não atendam aos critérios de idade, salvo aprovação manual da diretoria.
+O sistema deve enviar notificações automáticas aos tutores legais em tempo real (simulado).
+O portal de acompanhamento deve ser acessível e funcional para os tutores legais.
+O sistema deve garantir a integridade e segurança dos dados cadastrados.
+Essa especificação foi complementada com as tecnologias e critérios de avaliação solicitados. Caso haja necessidade de ajustes ou adições, favor informar.

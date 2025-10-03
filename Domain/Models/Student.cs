@@ -1,6 +1,6 @@
-﻿using API.Models.enums;
+﻿using Domain.Models.enums;
 
-namespace API.Models
+namespace Domain.Models
 {
     public class Student
     {
@@ -11,18 +11,9 @@ namespace API.Models
         public enumRegistrationStatus RegistrationStatus { get; set; }
         public DateTime RegistrationDate { get; set; }
 
-        public ICollection<Guardian> Guardians { get; set; }
+        public ICollection<StudentGuardian> StudentGuardians { get; set; }
         public ICollection<Notification> Notifications { get; set; }
         public DirectorApproval DirectorApproval { get; set; }
-
-        public Student()
-        {
-            Id = Guid.NewGuid();
-            RegistrationDate = DateTime.UtcNow;
-            RegistrationStatus = enumRegistrationStatus.Pending;
-            Guardians = new List<Guardian>();
-            Notifications = new List<Notification>();
-        }
 
         public int CalculateAge(DateTime referenceDate)
         {

@@ -1,4 +1,4 @@
-﻿namespace API.Models.enums
+﻿namespace Domain.Models.enums
 {
     public enum enumNotificationType
     {

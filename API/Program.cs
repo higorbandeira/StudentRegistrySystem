@@ -1,20 +1,35 @@
+using Infra.Data.Context;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<StudentRegistryContext>(x =>
+{
+    x.UseNpgsql(connectionString, options =>
+    {
+        options.MigrationsAssembly("Infra.Data");
+    });
+
+    x.EnableSensitiveDataLogging(); // Apenas para desenvolvimento
+    x.EnableDetailedErrors(); // Apenas para desenvolvimento
+    x.LogTo(Console.WriteLine, LogLevel.Information); // Log das queries
+});
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
+using var scope = app.Services.CreateScope();
+var dbContext = scope.ServiceProvider.GetRequiredService<StudentRegistryContext>();
+dbContext.Database.Migrate();
 
 app.UseHttpsRedirection();
 
