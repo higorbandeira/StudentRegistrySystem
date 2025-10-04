@@ -8,10 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<StudentRegistryContext>(x =>
 {
-    x.UseNpgsql(connectionString, options =>
-    {
-        options.MigrationsAssembly("Infra.Data");
-    });
+    x.UseNpgsql(connectionString);
 
     x.EnableSensitiveDataLogging(); // Apenas para desenvolvimento
     x.EnableDetailedErrors(); // Apenas para desenvolvimento
